@@ -1,0 +1,7 @@
+// Purpose: Ignore files and directories in git
+./dist
+
+*.log
+*.log.*
+
+/node_modules

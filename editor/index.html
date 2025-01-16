@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NotITG Editor 1.0</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.js" integrity="sha512-+maVcOki4j7Zo1VOqbhjH/fKV7iuE9WYMdhObx1ozxz2xu3qZMVCGHOAZKLKLksakyaWllQzafnLZSGBRl3lRg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+    <script src="../dist/main.js"></script>
+    <div id="overlay">
+        Drag and drop a folder containing a NotITG song to begin.
+    </div>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+        }
+    </style>
+</body>
+</html>

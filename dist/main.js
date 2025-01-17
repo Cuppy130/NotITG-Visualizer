@@ -10,7 +10,7 @@ let debug = true;
 let song = null;
 const scx = 640 / 2;
 const backgroundImage = new THREE.TextureLoader().load('ITG2.png');
-const backgroundMesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.MeshBasicMaterial({
+const backgroundMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({
     map: backgroundImage,
     depthTest: false,
     depthWrite: false

@@ -17,7 +17,7 @@ const scx = 640/2;
 
 const backgroundImage = new THREE.TextureLoader().load('ITG2.png');
 const backgroundMesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(2, 2),
+    new THREE.PlaneGeometry(1, 1),
     new THREE.MeshBasicMaterial({
         map: backgroundImage,
         depthTest: false,
@@ -359,9 +359,9 @@ class Mods {
 }
 
 class Receptor {
-    model: import("/home/cuppy/Desktop/NotITG Visualizer/node_modules/@types/three/index").Mesh;
+    model: import("/home/cuppy/Desktop/NotITG-Visualizer/node_modules/@types/three/index").Mesh;
     spline: Spline;
-    receptorGlow: import("/home/cuppy/Desktop/NotITG Visualizer/node_modules/@types/three/index").Mesh;
+    receptorGlow: import("/home/cuppy/Desktop/NotITG-Visualizer/node_modules/@types/three/index").Mesh;
     constructor(i: number){
         this.spline = new Spline([
             new THREE.Vector3(i-1.5, -6, 0),
@@ -464,15 +464,15 @@ function onKeyPressed(e: KeyboardEvent){
 document.addEventListener('keydown', onKeyPressed);
 
 class Player {
-    scene: import("/home/cuppy/Desktop/NotITG Visualizer/node_modules/@types/three/index").Scene;
-    camera: import("/home/cuppy/Desktop/NotITG Visualizer/node_modules/@types/three/index").PerspectiveCamera;
-    position: import("/home/cuppy/Desktop/NotITG Visualizer/node_modules/@types/three/index").Vector3;
+    scene: import("/home/cuppy/Desktop/NotITG-Visualizer/node_modules/@types/three/index").Scene;
+    camera: import("/home/cuppy/Desktop/NotITG-Visualizer/node_modules/@types/three/index").PerspectiveCamera;
+    position: import("/home/cuppy/Desktop/NotITG-Visualizer/node_modules/@types/three/index").Vector3;
     mods: {
         [key: string]: number;
     };
     notes: Note[];
     receptors: Receptor[];
-    model: import("/home/cuppy/Desktop/NotITG Visualizer/node_modules/@types/three/index").Mesh;
+    model: import("/home/cuppy/Desktop/NotITG-Visualizer/node_modules/@types/three/index").Mesh;
     pn: number;
     constructor(pn: number, x: number, y: number){
         this.scene = new THREE.Scene();
@@ -646,10 +646,10 @@ class Player {
 }
 
 class Spline {
-    points : import("/home/cuppy/Desktop/NotITG Visualizer/node_modules/@types/three/index").Vector3[];
-    curve : import("/home/cuppy/Desktop/NotITG Visualizer/node_modules/@types/three/index").CatmullRomCurve3;  
-    spline : import("/home/cuppy/Desktop/NotITG Visualizer/node_modules/@types/three/index").Line;
-    constructor(points : import("/home/cuppy/Desktop/NotITG Visualizer/node_modules/@types/three/index").Vector3[]){
+    points : import("/home/cuppy/Desktop/NotITG-Visualizer/node_modules/@types/three/index").Vector3[];
+    curve : import("/home/cuppy/Desktop/NotITG-Visualizer/node_modules/@types/three/index").CatmullRomCurve3;  
+    spline : import("/home/cuppy/Desktop/NotITG-Visualizer/node_modules/@types/three/index").Line;
+    constructor(points : import("/home/cuppy/Desktop/NotITG-Visualizer/node_modules/@types/three/index").Vector3[]){
         this.points = points;
         const curve = new THREE.CatmullRomCurve3(points);
         this.curve = curve;
@@ -666,7 +666,7 @@ class Spline {
         return this.curve.getPointAt(beat);
     }
 
-    setPosition(index: number, position: import("/home/cuppy/Desktop/NotITG Visualizer/node_modules/@types/three/index").Vector3){
+    setPosition(index: number, position: import("/home/cuppy/Desktop/NotITG-Visualizer/node_modules/@types/three/index").Vector3){
         this.points[index].set(position.x, position.y, position.z);
     }
 }
@@ -762,8 +762,8 @@ class Note {
 
     player: Player;
 
-    model: import("/home/cuppy/Desktop/NotITG Visualizer/node_modules/@types/three/index").Mesh;
-    holdBody: import("/home/cuppy/Desktop/NotITG Visualizer/node_modules/@types/three/index").Mesh | null | import("/home/cuppy/Desktop/NotITG Visualizer/node_modules/@types/three/index").Line;
+    model: import("/home/cuppy/Desktop/NotITG-Visualizer/node_modules/@types/three/index").Mesh;
+    holdBody: import("/home/cuppy/Desktop/NotITG-Visualizer/node_modules/@types/three/index").Mesh | null | import("/home/cuppy/Desktop/NotITG-Visualizer/node_modules/@types/three/index").Line;
 
     constructor(type: number, lane: number, beat: number, len: number = 0, player : Player){
         this.type = type;

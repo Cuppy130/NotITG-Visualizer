@@ -298,14 +298,14 @@ class Player {
             skewy: 0,
             xmod: 1.5,
             cmod: 150,
-            tipsy: 100,
+            tipsy: 0,
             tipsyspeed: 0,
             tipsyoffset: 0,
             tipsyspacing: 0,
             flip: 0,
             invert: 0,
             alternate: 0,
-            drunk: 0,
+            drunk: 100,
             drunkspeed: 0,
             drunkspacing: 0,
             drunkoffset: 0,
@@ -381,7 +381,7 @@ class Player {
                 const spline = receptor.spline;
                 const points = spline.points;
                 for (let j = 0; j < points.length; j++) {
-                    points[j].x = drunk * Math.sin(j + song.currentTime) + i - 1.5 + this.model.position.x;
+                    points[j].x = drunk * Math.sin(j + song.currentTime) + ((i - 1.5) * ((this.mods.flip / -50) + 1)) + this.model.position.x;
                     points[j].y = tipsy * (j / 10) + j - 6.5;
                 }
                 const confusion = (this.mods['confusion'] + this.mods[`confusion${i}`]) / 100;
@@ -416,7 +416,7 @@ class Spline {
         this.points = points;
         const curve = new THREE.CatmullRomCurve3(points);
         this.curve = curve;
-        const points2 = curve.getPoints(50);
+        const points2 = curve.getPoints(100);
         const geometry = new THREE.BufferGeometry().setFromPoints(points2);
         const material = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 2, transparent: true, opacity: 1 });
         const spline = new THREE.Line(geometry, material);
@@ -548,12 +548,14 @@ class Note {
                 tex.offset.y = oy / 4;
                 tex.repeat.x = 1 / 4;
                 tex.repeat.y = 1 / 4;
-            })
+            }),
+            depthWrite: false,
+            depthTest: false
         }));
         this.model.rotation.z = lane < 1 ? -Math.PI / 2 : lane < 2 ? 0 : lane > 2 ? Math.PI / 2 : Math.PI;
         this.holdBody = null;
         if (type === 1) {
-            this.holdBody = new THREE.Mesh(new THREE.PlaneGeometry(1, len, 1, len * 4), new THREE.MeshBasicMaterial({
+            this.holdBody = new THREE.Mesh(new THREE.PlaneGeometry(1, len, 1, len * 8), new THREE.MeshBasicMaterial({
                 transparent: true,
                 map: new THREE.TextureLoader().load(`./images/tex notes.png`, tex => {
                     tex.offset.x = 2 / 4;
@@ -561,7 +563,10 @@ class Note {
                     tex.offset.y = 1 / 4;
                     tex.repeat.y = 1 / 4;
                 }),
-                side: THREE.DoubleSide
+                side: THREE.DoubleSide,
+                opacity: 0.5,
+                depthWrite: false,
+                depthTest: false
             }));
             let position = this.player.receptors[this.lane].spline.getPosition(0);
             this.holdBody.position.set(position.x, position.y, position.z);
@@ -582,23 +587,22 @@ class Note {
         let player = this.player;
         let receptor = player.receptors[this.lane];
         let normalizedBeat = ((this.beat - songBeat) / modchart.BPMS[0][1]) * -player.mods.xmod * 25 + 1;
-        let position = receptor.spline.getPosition(normalizedBeat);
-        this.model.position.set(position.x + (this.player.position.x / 100), position.y, position.z);
-        let normalizedLen = this.len / modchart.BPMS[0][1] * -player.mods.xmod * 25;
+        let normalizedLen = this.len / modchart.BPMS[0][1] * -player.mods.xmod * 25 + this.len;
+        let pos = this.model.position.clone();
+        this.holdBody?.position.set(pos.x, pos.y, pos.z);
         if (this.beat + this.len < songBeat) {
         }
         else {
             if (this.holdBody) {
                 this.holdBody.material.opacity = 1;
-                let holdWidth = 1;
                 let points = this.holdBody.geometry.attributes.position.array;
-                let x = position.x;
-                let y = position.y;
-                let z = position.z;
-                this.holdBody.position.set(x, y, z);
+                let holdWidth = 1;
                 let spline = receptor.spline;
+                this.holdBody.position.set(0, 0, 0);
+                this.holdBody.geometry.attributes.position.needsUpdate = true;
                 for (let i = 0; i < points.length; i += 6) {
-                    let position = spline.getPosition((i / points.length) * normalizedLen + normalizedBeat);
+                    let normalized = (i / points.length) * normalizedLen;
+                    let position = spline.getPosition(normalized + normalizedBeat);
                     points[i] = position.x - holdWidth / 2;
                     points[i + 1] = position.y;
                     points[i + 2] = position.z;
@@ -608,7 +612,6 @@ class Note {
                         points[i + 5] = position.z;
                     }
                 }
-                this.holdBody.geometry.attributes.position.needsUpdate = true;
             }
         }
     }

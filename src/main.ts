@@ -1,7 +1,6 @@
 declare const THREE: typeof import('three');
 
 const scene = new THREE.Scene();
-// const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
 renderer.autoClear = false;
 renderer.domElement.style.imageRendering = 'pixelated';
@@ -17,7 +16,7 @@ const scx = 640/2;
 
 const backgroundImage = new THREE.TextureLoader().load('ITG2.png');
 const backgroundMesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(1, 1),
+    new THREE.PlaneGeometry(2, 2),
     new THREE.MeshBasicMaterial({
         map: backgroundImage,
         depthTest: false,
@@ -36,127 +35,23 @@ const receptorImage = new Array(4).fill(0).map((_, i) => new THREE.TextureLoader
     tex.wrapS = THREE.ClampToEdgeWrapping;
     tex.wrapT = THREE.ClampToEdgeWrapping;
 
-    tex.offset.x = i / 2;
+    tex.offset.x = 1 / 2;
     tex.repeat.x = 1 / 2;
 
     tex.offset.y = 0;
     tex.repeat.y = 1;
 }));
 
-const receptorGlowImage = new Array(4).fill(0).map((_, i) => new THREE.TextureLoader().load(`./images/tex glow.png`, tex => {
+const receptorGlowImage = new THREE.TextureLoader().load(`./images/tex glow.png`, tex => {
     tex.minFilter = THREE.NearestFilter;
     tex.magFilter = THREE.NearestFilter;
     tex.wrapS = THREE.ClampToEdgeWrapping;
     tex.wrapT = THREE.ClampToEdgeWrapping;
-}));
-
-
-
-// let player1 = new THREE.Mesh(
-//     new THREE.PlaneGeometry(4, 8),
-//     new THREE.MeshBasicMaterial({
-//         transparent: true,
-//         opacity: 0.5
-//     })
-// );
-
-// let player1Mods = {
-//     tipsy: 100,
-//     tipsyspeed: 500,
-//     tipsyoffset: 0,
-//     tipsyspacing: 4000,
-
-//     confusion: 100,
-
-//     x: 0,
-//     y: 0,
-//     z: 0,
-
-//     rotationx: 0,
-//     rotationy: 0,
-//     rotationz: 0,
-
-//     zoom: 100,
-//     zoomx: 100,
-//     zoomy: 100,
-//     zoomz: 100,
-
-//     skewx: 0,
-//     skewy: 0,
-
-//     xmod: 1.5,
-//     cmod: 150,
-
-    
-// };
-
-// const receptors = new Array(4).fill(0).map((_, i) => {
-//     const receptor = new THREE.Mesh(
-//         new THREE.PlaneGeometry(1, 1),
-//         new THREE.MeshBasicMaterial({
-//             transparent: true,
-//             map: receptorImage[0]
-//         })
-//     );
-//     receptor.position.x = i - 1.5;
-//     receptor.position.y = 2;
-
-//     //make them face <- v ^ ->
-//     // by default they face down
-//     receptor.rotation.z = i < 1 ? -Math.PI / 2 : i < 2 ? 0 : i > 2 ? Math.PI / 2 : Math.PI;
-//     player1.add(receptor);
-//     return receptor;
-// });
-
-// const receptorGlow = new Array(4).fill(0).map((_, i) => {
-//     const glow = new THREE.Mesh(
-//         new THREE.PlaneGeometry(1.5, 1.5),
-//         new THREE.MeshBasicMaterial({
-//             transparent: true,
-//             map: receptorGlowImage[0]
-//         })
-//     );
-//     glow.position.z = 0.001;
-//     receptors[i].add(glow);
-//     return glow;
-// });
-
-// scene.add(player1);
+});
 
 
 const animate = function () {
-
-
-    // receptors.forEach((receptor, i : number) => {
-    //     if(!song){
-    //         receptor.rotation.z = i < 1 ? -Math.PI / 2 : i < 2 ? 0 : i > 2 ? Math.PI / 2 : Math.PI;
-
-    //         receptor.rotation.z += ((Date.now() * 0.0025) % (Math.PI * 2)) * (player1Mods.confusion / 100);
-
-    //         // receptor.rotation.z += 0.05;
-    //         // receptor.position.y = (Math.sin(Date.now() * 0.001 + i) * 0.5) * (player1Mods.tipsy / 100) + 2;
-
-    //         receptor.position.y = 2 + (Math.sin(((player1Mods.tipsyspeed + 100) / 100) * Date.now() * 0.001 + (i * ((player1Mods.tipsyspacing + 100) / 100)) + (player1Mods.tipsyoffset / 100)) * 0.5) * (player1Mods.tipsy / 100);
-
-    //         receptor.material.map = receptorImage[Math.floor(Date.now() * 0.001) % 2];
-
-    //         let date = Date.now() * 0.005 % 4;
-    //         //make a wave glow effect
-    //         let glow = receptorGlow[i];
-    //         //let the first one glow and fade out
-    //         let glow0 = Math.abs(date - i) < 0.5;
-            
-    //         glow.material.opacity = Math.min(1, Math.max(0, (glow0) ? 1 : glow.material.opacity - 0.05));
-    //     } else {
-    //     }
-    // });
-
-    // player1.position.x = - scx/2 / 100 + player1Mods.x / 100;
-
     renderer.render(backgroundScene, backgroundCamera);
-
-
-
     renderer.render(data.player1.scene, data.player1.camera);
     renderer.render(data.player2.scene, data.player2.camera);
 
@@ -165,24 +60,17 @@ const animate = function () {
         songBeat = (songTime + modchart.OFFSET) / 60 * modchart.BPMS[0][1];
     } else {
         console.log("Song missing")
-        setTimeout(animate, 1000 / 1);
+        setTimeout(animate, 1000 / 5);
         return;
     }
 
     data.player1.update();
     data.player2.update();
 
-
-
-
-
-    // renderer.render(scene, camera);
-
     setTimeout(animate, 1000 / 60);
 };
 
-
-window.addEventListener('resize', () => {
+function onResize(){
     if (window.innerWidth / window.innerHeight > displayRatio) {
         renderer.setSize(window.innerHeight * displayRatio, window.innerHeight);
         [data.player1, data.player2].forEach(player => {
@@ -196,8 +84,10 @@ window.addEventListener('resize', () => {
             player.camera.updateProjectionMatrix();
         });
     }
-    
-});
+}
+
+window.addEventListener('resize', onResize);
+
 
 document.addEventListener('dragover', (e) => {
     e.preventDefault();
@@ -348,8 +238,6 @@ class Mods {
             let type = mod.substring(0, mod.indexOf("{"));
             let args = mod.substring(mod.indexOf("{") + 1, mod.indexOf("}")).split(',').map(arg => arg.trim());
             this.mods.push(new Mod(type, ...args));
-
-
         }
         // console.log(this.toString())
     }
@@ -364,8 +252,8 @@ class Receptor {
     receptorGlow: import("/home/cuppy/Desktop/NotITG-Visualizer/node_modules/@types/three/index").Mesh;
     constructor(i: number){
         this.spline = new Spline([
-            new THREE.Vector3(i-1.5, -6, 0),
-            new THREE.Vector3(i-1.5, 3, 0),
+            //8 points from y = -6 to y = 4
+            ...[...Array(10).keys()].map(i => new THREE.Vector3(0, i - 6, 0))
         ]);
 
         this.model = new THREE.Mesh(
@@ -383,8 +271,8 @@ class Receptor {
             new THREE.PlaneGeometry(1.5, 1.5),
             new THREE.MeshBasicMaterial({
                 transparent: true,
-                map: receptorGlowImage[0],
-                opacity: 0.5
+                map: receptorGlowImage,
+                opacity: 0
             })
         );
         this.model.add(this.receptorGlow);
@@ -408,7 +296,7 @@ class Receptor {
     }
 
     update(player : Player){
-        this.model.position.x = this.spline.getPosition(1).x;
+        this.model.position.x = this.spline.getPosition(1).x - player.position.x / 100;
         this.model.position.y = this.spline.getPosition(1).y;
         this.model.position.z = this.spline.getPosition(1).z;
     }
@@ -484,6 +372,8 @@ class Player {
             rotationy: 0,
             rotationz: 0,
 
+            wave: 0,
+
             x: 0,
             y: 0,
             z: 0,
@@ -499,7 +389,7 @@ class Player {
             xmod: 1.5,
             cmod: 150,
 
-            tipsy: 0,
+            tipsy: 100,
             tipsyspeed: 0,
             tipsyoffset: 0,
             tipsyspacing: 0,
@@ -508,7 +398,7 @@ class Player {
             invert: 0,
             alternate: 0,
 
-            drunk: 25,
+            drunk: 0,
             drunkspeed: 0,
             drunkspacing: 0,
             drunkoffset: 0,
@@ -542,6 +432,7 @@ class Player {
             this.mods[`confusionyoffset${i}`] = 0;
             this.mods[`confusionzoffset${i}`] = 0;
             this.mods[`drunk${i}`] = 0;
+            this.mods[`wave${i}`] = 0;
         }
 
         this.pn = Math.floor(pn);
@@ -585,7 +476,9 @@ class Player {
                 } else if(note.beat <= songBeat && note.beat+0.1 >= songBeat && note.type === 0){ //taps
                     receptor.setGlow(100);
                 } else if(note.beat <= songBeat && note.beat + note.len >= songBeat && note.type === 4){ //rolls
-                    receptor.setGlow(100);
+                    //tri function
+                    let tri = Math.abs((songBeat - note.beat)*2 % 1 - 0.5) * 2;
+                    receptor.setGlow(tri * 100);
                 } else {
                     receptor.setGlow(receptor.getGlow() - 0.5);
                 }
@@ -594,17 +487,21 @@ class Player {
                 //update the spline
                 const drunk = ((this.mods['drunk'] + this.mods[`drunk${i}`]) / 100) * Math.sin((this.mods['drunkspeed'] / 100 + 1) * time + (i * ((this.mods['drunkspacing'] / 100) + 1) + (this.mods['drunkoffset'] / 100)) * 0.5);
 
+                const tipsy = ((this.mods['tipsy'] + this.mods[`tipsy${i}`]) / 100) * Math.sin((this.mods['tipsyspeed'] / 100 + 1) * time + (i * ((this.mods['tipsyspacing'] / 100) + 1) + (this.mods['tipsyoffset'] / 100)) * 0.5);
+
                 const spline = receptor.spline;
                 const points = spline.points;
                 for(let j = 0; j < points.length; j++){
-                    points[j].x = drunk + i - 1.5;
+                    points[j].x = drunk * Math.sin(j + song.currentTime) + i - 1.5 + this.model.position.x;
+                    // points[j].y = tipsy * Math.sin(j) * 1 + j - 6.5;
+                    points[j].y = tipsy * (j/10) + j - 6.5;
                 }
 
                 //mods
-                const tipsy = (this.mods['tipsy'] + this.mods[`tipsy${i}`]) / 100;
-                const tipsyspeed = (this.mods['tipsyspeed'] + this.mods[`tipsyspeed${i}`]) / 100;
-                const tipsyoffset = (this.mods['tipsyoffset'] + this.mods[`tipsyoffset${i}`]) / 100;
-                const tipsyspacing = (this.mods['tipsyspacing'] + this.mods[`tipsyspacing${i}`]) / 100;
+                // const tipsy = (this.mods['tipsy'] + this.mods[`tipsy${i}`]) / 100;
+                // const tipsyspeed = (this.mods['tipsyspeed'] + this.mods[`tipsyspeed${i}`]) / 100;
+                // const tipsyoffset = (this.mods['tipsyoffset'] + this.mods[`tipsyoffset${i}`]) / 100;
+                // const tipsyspacing = (this.mods['tipsyspacing'] + this.mods[`tipsyspacing${i}`]) / 100;
 
                 const confusion = (this.mods['confusion'] + this.mods[`confusion${i}`]) / 100;
                 const confusionxoffset = (this.mods['confusionxoffset'] + this.mods[`confusionxoffset${i}`]) / 100;
@@ -612,16 +509,19 @@ class Player {
                 const confusionzoffset = (this.mods['confusionzoffset'] + this.mods[`confusionzoffset${i}`]) / 100;
 
 
-                const movex = (this.mods['movex'] + this.mods[`movex${i}`] + this.mods['x']) / 100;
-                const movey = (this.mods['movey'] + this.mods[`movey${i}`] + this.mods['y']) / 100;
+                // const movex = (this.mods['movex'] + this.mods[`movex${i}`] + this.mods['x']) / 100;
+                // const movey = (this.mods['movey'] + this.mods[`movey${i}`] + this.mods['y']) / 100;
 
                 let splinePosition = receptor.spline.getPosition((note.beat - songBeat) / modchart.BPMS[0][1] * -this.mods.xmod * 25 + 1);
                 note.model.position.set(splinePosition.x, splinePosition.y, splinePosition.z);
 
-                note.model.position.y += (tipsy) * Math.sin(((tipsyspeed + 100) / 100) * time + (i * (((tipsyspacing + 100) / 100)) + (tipsyoffset / 100)) * 0.5);
+                // note.model.position.y += (tipsy) * Math.sin(((tipsyspeed + 100) / 100) * time + (i * (((tipsyspacing + 100) / 100)) + (tipsyoffset / 100)) * 0.5);
 
                 note.model.rotation.z = i < 1 ? -Math.PI / 2 : i < 2 ? 0 : i > 2 ? Math.PI / 2 : Math.PI;
                 note.model.rotation.z += time * confusion + confusionzoffset;
+
+                note.model.rotation.x = confusionxoffset;
+                note.model.rotation.y = confusionyoffset;
 
                 if(note.beat < songBeat){
                     //@ts-ignore
@@ -630,13 +530,10 @@ class Player {
                     //@ts-ignore
                     note.model.material.opacity = 1;
                 }
-            })
-            // receptor.setGlow();
-
-
+            });
             receptor.update(this);
-            receptor.model.position.y += (this.mods['tipsy'] / 100) * Math.sin(((this.mods['tipsyspeed'] + 100) / 100) * time  + (i * ((this.mods['tipsyspacing'] + 100) / 100) + (this.mods['tipsyoffset'] / 100)) * 0.5);
             receptor.model.rotation.z = i < 1 ? -Math.PI / 2 : i < 2 ? 0 : i > 2 ? Math.PI / 2 : Math.PI;
+            // receptor.model.position.y += (this.mods['tipsy'] / 100) * Math.sin(((this.mods['tipsyspeed'] + 100) / 100) * time  + (i * ((this.mods['tipsyspacing'] + 100) / 100) + (this.mods['tipsyoffset'] / 100)) * 0.5);
             receptor.model.rotation.z += time * (this.mods['confusion'] / 100) + (this.mods['confusionzoffset'] / 100);
             receptor.model.position.x += (this.mods['movex'] / 100);
         });
@@ -777,64 +674,57 @@ class Note {
             new THREE.MeshBasicMaterial({
                 transparent: true,
                 map: new THREE.TextureLoader().load(`./images/tex notes.png`, tex => {
-                    tex.offset.x = 0 / 4;
+
+                    let ox = 0;
+                    let oy = 3;
+
+                    if(Math.round((beat % 1) * 128)/128 === .5){
+                        ox = 1;
+                        oy = 3;
+                    } else if(Math.round((beat % 1) * 128)/128 === 1/3){
+                        ox = 2;
+                        oy = 3;
+                    } else if(Math.round((beat % 1) * 128)/128 === 2/3){
+                        ox = 0;
+                        oy = 2;
+                    } else if(Math.round((beat % 1) * 128)/128 === 1/4){
+                        ox = 3;
+                        oy = 3;
+                    } else if(Math.round((beat % 1) * 128)/128 === 3/4){
+                        ox = 3;
+                        oy = 3;
+                    }
+                    tex.offset.x = ox / 4;
+                    tex.offset.y = oy / 4;
                     tex.repeat.x = 1 / 4;
-                    tex.offset.y = 3 / 4;
                     tex.repeat.y = 1 / 4;
                 })
             })
         )
         this.model.rotation.z = lane < 1 ? -Math.PI / 2 : lane < 2 ? 0 : lane > 2 ? Math.PI / 2 : Math.PI;
-
         this.holdBody = null;
-
         if(type === 1){
-            //hold
-            // this.holdBody = new THREE.Mesh(
-            //     new THREE.PlaneGeometry(1, 1),
-            //     new THREE.MeshBasicMaterial({
-            //         transparent: true,
-            //         map: new THREE.TextureLoader().load(`./images/tex notes.png`, tex => {
-            //             tex.offset.x = 2 / 4;
-            //             tex.repeat.x = 1 / 4;
-            //             tex.offset.y = 1 / 4;
-            //             tex.repeat.y = 1 / 4;
-            //         })
-            //     })
-            // )
+            // hold
+            this.holdBody = new THREE.Mesh(
+                new THREE.PlaneGeometry(1, len, 1, len * 4),
+                new THREE.MeshBasicMaterial({
+                    transparent: true,
+                    map: new THREE.TextureLoader().load(`./images/tex notes.png`, tex => {
+                        tex.offset.x = 2 / 4;
+                        tex.repeat.x = 1 / 4;
+                        tex.offset.y = 1 / 4;
+                        tex.repeat.y = 1 / 4;
+                    }),
+                    side: THREE.DoubleSide
+                })
+            )
 
-            //make holdbody into a curved plane
-            // let curvePoints = [
-            //     new THREE.Vector3(0, -3, 1),
-            //     new THREE.Vector3(0, 0, 0),
-            //     new THREE.Vector3(0, 3, 1)
-            // ]
-            // const curve = new THREE.CatmullRomCurve3(curvePoints);
+            let position = this.player.receptors[this.lane].spline.getPosition(0);
+            this.holdBody.position.set(position.x, position.y, position.z);
 
-            // const points = curve.getPoints(50);
-            // const geometry = new THREE.BufferGeometry().setFromPoints(points);
-            // const material = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 1, transparent: true, opacity: 0.5});
-            // this.holdBody = new THREE.Line(geometry, material);
+            this.player.scene.add(this.holdBody);
+
             
-            // this.model.add(this.holdBody);
-
-            // this.holdBody = new THREE.Mesh(
-            //     new THREE.PlaneGeometry(1, 1),
-            //     new THREE.MeshBasicMaterial({
-            //         transparent: true,
-            //         map: new THREE.TextureLoader().load(`./images/tex notes.png`, tex => {
-            //             tex.offset.x = 2 / 4;
-            //             tex.repeat.x = 1 / 4;
-            //             tex.offset.y = 1 / 4;
-            //             tex.repeat.y = 1 / 4;
-            //         })
-            //     })
-            // )
-
-            // let position = this.player.receptors[this.lane].spline.getPosition(0);
-            // this.holdBody.position.set(position.x, position.y, position.z);
-
-            // this.player.scene.add(this.holdBody);
 
             // const tail = new THREE.Mesh(
             //     new THREE.PlaneGeometry(1, 1),
@@ -854,17 +744,20 @@ class Note {
             // this.holdBody.add(tail);
 
             // this.model.add(this.holdBody);
-        }
 
-        // this.model.position.x = lane - 1.5;
-        // this.model.position.y = 3 + (beat - songBeat) * -(player.mods.xmod / 100);
+        } else if(type === 2){
+            //mine
+            //@ts-ignore
+            this.model.material.map = new THREE.TextureLoader().load(`./images/tex notes.png`, tex => {
+                tex.offset.x = 1 / 4;
+                tex.repeat.x = 1 / 4;
+                tex.offset.y = 1 / 4;
+                tex.repeat.y = 1 / 4;
+            });
+        }
         
         this.player.notes.push(this);
-
         this.player.scene.add(this.model);
-
-
-
     }
 
     update(){
@@ -875,6 +768,39 @@ class Note {
 
         let position = receptor.spline.getPosition(normalizedBeat);
         this.model.position.set(position.x + (this.player.position.x / 100), position.y, position.z);
+        let normalizedLen: number = this.len / modchart.BPMS[0][1] * -player.mods.xmod * 25;
+
+        if(this.beat + this.len < songBeat){
+        } else {
+            if(this.holdBody){
+                //@ts-ignore
+                this.holdBody.material.opacity = 1;
+                let holdWidth = 1
+                //extrude the hold body
+                let points = this.holdBody.geometry.attributes.position.array;
+
+                let x = position.x;
+                let y = position.y;
+                let z = position.z;
+                this.holdBody.position.set(x, y, z);
+                let spline = receptor.spline;
+                for(let i = 0; i < points.length; i+=6){
+                    let position = spline.getPosition((i / points.length) * normalizedLen + normalizedBeat);
+                    points[i] = position.x - holdWidth / 2;
+                    points[i + 1] = position.y;
+                    points[i + 2] = position.z;
+
+                    if(i + 3 < points.length){
+                        points[i + 3] = position.x + holdWidth / 2;
+                        points[i + 4] = position.y;
+                        points[i + 5] = position.z;
+                    }
+                }
+                this.holdBody.geometry.attributes.position.needsUpdate = true;
+
+                
+            }
+        }
     }
 }
 
@@ -1026,4 +952,5 @@ let data = {
     player2: new Player(2, scx, 0)
 }
 
+onResize();
 animate();

@@ -10,7 +10,7 @@ let debug = true;
 let song = null;
 const scx = 640 / 2;
 const backgroundImage = new THREE.TextureLoader().load('ITG2.png');
-const backgroundMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({
+const backgroundMesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.MeshBasicMaterial({
     map: backgroundImage,
     depthTest: false,
     depthWrite: false
@@ -24,17 +24,17 @@ const receptorImage = new Array(4).fill(0).map((_, i) => new THREE.TextureLoader
     tex.magFilter = THREE.NearestFilter;
     tex.wrapS = THREE.ClampToEdgeWrapping;
     tex.wrapT = THREE.ClampToEdgeWrapping;
-    tex.offset.x = i / 2;
+    tex.offset.x = 1 / 2;
     tex.repeat.x = 1 / 2;
     tex.offset.y = 0;
     tex.repeat.y = 1;
 }));
-const receptorGlowImage = new Array(4).fill(0).map((_, i) => new THREE.TextureLoader().load(`./images/tex glow.png`, tex => {
+const receptorGlowImage = new THREE.TextureLoader().load(`./images/tex glow.png`, tex => {
     tex.minFilter = THREE.NearestFilter;
     tex.magFilter = THREE.NearestFilter;
     tex.wrapS = THREE.ClampToEdgeWrapping;
     tex.wrapT = THREE.ClampToEdgeWrapping;
-}));
+});
 const animate = function () {
     renderer.render(backgroundScene, backgroundCamera);
     renderer.render(data.player1.scene, data.player1.camera);
@@ -45,14 +45,14 @@ const animate = function () {
     }
     else {
         console.log("Song missing");
-        setTimeout(animate, 1000 / 1);
+        setTimeout(animate, 1000 / 5);
         return;
     }
     data.player1.update();
     data.player2.update();
     setTimeout(animate, 1000 / 60);
 };
-window.addEventListener('resize', () => {
+function onResize() {
     if (window.innerWidth / window.innerHeight > displayRatio) {
         renderer.setSize(window.innerHeight * displayRatio, window.innerHeight);
         [data.player1, data.player2].forEach(player => {
@@ -67,7 +67,8 @@ window.addEventListener('resize', () => {
             player.camera.updateProjectionMatrix();
         });
     }
-});
+}
+window.addEventListener('resize', onResize);
 document.addEventListener('dragover', (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -194,8 +195,7 @@ class Receptor {
     receptorGlow;
     constructor(i) {
         this.spline = new Spline([
-            new THREE.Vector3(i - 1.5, -6, 0),
-            new THREE.Vector3(i - 1.5, 3, 0),
+            ...[...Array(10).keys()].map(i => new THREE.Vector3(0, i - 6, 0))
         ]);
         this.model = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({
             transparent: true,
@@ -206,8 +206,8 @@ class Receptor {
         this.model.rotation.z = i < 1 ? -Math.PI / 2 : i < 2 ? 0 : i > 2 ? Math.PI / 2 : Math.PI;
         this.receptorGlow = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.5), new THREE.MeshBasicMaterial({
             transparent: true,
-            map: receptorGlowImage[0],
-            opacity: 0.5
+            map: receptorGlowImage,
+            opacity: 0
         }));
         this.model.add(this.receptorGlow);
     }
@@ -221,7 +221,7 @@ class Receptor {
         return this.receptorGlow.material.opacity * 100;
     }
     update(player) {
-        this.model.position.x = this.spline.getPosition(1).x;
+        this.model.position.x = this.spline.getPosition(1).x - player.position.x / 100;
         this.model.position.y = this.spline.getPosition(1).y;
         this.model.position.z = this.spline.getPosition(1).z;
     }
@@ -286,6 +286,7 @@ class Player {
             rotationx: 0,
             rotationy: 0,
             rotationz: 0,
+            wave: 0,
             x: 0,
             y: 0,
             z: 0,
@@ -297,14 +298,14 @@ class Player {
             skewy: 0,
             xmod: 1.5,
             cmod: 150,
-            tipsy: 0,
+            tipsy: 100,
             tipsyspeed: 0,
             tipsyoffset: 0,
             tipsyspacing: 0,
             flip: 0,
             invert: 0,
             alternate: 0,
-            drunk: 25,
+            drunk: 0,
             drunkspeed: 0,
             drunkspacing: 0,
             drunkoffset: 0,
@@ -333,6 +334,7 @@ class Player {
             this.mods[`confusionyoffset${i}`] = 0;
             this.mods[`confusionzoffset${i}`] = 0;
             this.mods[`drunk${i}`] = 0;
+            this.mods[`wave${i}`] = 0;
         }
         this.pn = Math.floor(pn);
         this.model = new THREE.Mesh(new THREE.PlaneGeometry(4, 8), new THREE.MeshBasicMaterial({
@@ -367,33 +369,31 @@ class Player {
                     receptor.setGlow(100);
                 }
                 else if (note.beat <= songBeat && note.beat + note.len >= songBeat && note.type === 4) {
-                    receptor.setGlow(100);
+                    let tri = Math.abs((songBeat - note.beat) * 2 % 1 - 0.5) * 2;
+                    receptor.setGlow(tri * 100);
                 }
                 else {
                     receptor.setGlow(receptor.getGlow() - 0.5);
                 }
                 note.update();
                 const drunk = ((this.mods['drunk'] + this.mods[`drunk${i}`]) / 100) * Math.sin((this.mods['drunkspeed'] / 100 + 1) * time + (i * ((this.mods['drunkspacing'] / 100) + 1) + (this.mods['drunkoffset'] / 100)) * 0.5);
+                const tipsy = ((this.mods['tipsy'] + this.mods[`tipsy${i}`]) / 100) * Math.sin((this.mods['tipsyspeed'] / 100 + 1) * time + (i * ((this.mods['tipsyspacing'] / 100) + 1) + (this.mods['tipsyoffset'] / 100)) * 0.5);
                 const spline = receptor.spline;
                 const points = spline.points;
                 for (let j = 0; j < points.length; j++) {
-                    points[j].x = drunk + i - 1.5;
+                    points[j].x = drunk * Math.sin(j + song.currentTime) + i - 1.5 + this.model.position.x;
+                    points[j].y = tipsy * (j / 10) + j - 6.5;
                 }
-                const tipsy = (this.mods['tipsy'] + this.mods[`tipsy${i}`]) / 100;
-                const tipsyspeed = (this.mods['tipsyspeed'] + this.mods[`tipsyspeed${i}`]) / 100;
-                const tipsyoffset = (this.mods['tipsyoffset'] + this.mods[`tipsyoffset${i}`]) / 100;
-                const tipsyspacing = (this.mods['tipsyspacing'] + this.mods[`tipsyspacing${i}`]) / 100;
                 const confusion = (this.mods['confusion'] + this.mods[`confusion${i}`]) / 100;
                 const confusionxoffset = (this.mods['confusionxoffset'] + this.mods[`confusionxoffset${i}`]) / 100;
                 const confusionyoffset = (this.mods['confusionyoffset'] + this.mods[`confusionyoffset${i}`]) / 100;
                 const confusionzoffset = (this.mods['confusionzoffset'] + this.mods[`confusionzoffset${i}`]) / 100;
-                const movex = (this.mods['movex'] + this.mods[`movex${i}`] + this.mods['x']) / 100;
-                const movey = (this.mods['movey'] + this.mods[`movey${i}`] + this.mods['y']) / 100;
                 let splinePosition = receptor.spline.getPosition((note.beat - songBeat) / modchart.BPMS[0][1] * -this.mods.xmod * 25 + 1);
                 note.model.position.set(splinePosition.x, splinePosition.y, splinePosition.z);
-                note.model.position.y += (tipsy) * Math.sin(((tipsyspeed + 100) / 100) * time + (i * (((tipsyspacing + 100) / 100)) + (tipsyoffset / 100)) * 0.5);
                 note.model.rotation.z = i < 1 ? -Math.PI / 2 : i < 2 ? 0 : i > 2 ? Math.PI / 2 : Math.PI;
                 note.model.rotation.z += time * confusion + confusionzoffset;
+                note.model.rotation.x = confusionxoffset;
+                note.model.rotation.y = confusionyoffset;
                 if (note.beat < songBeat) {
                     note.model.material.opacity = 0;
                 }
@@ -402,7 +402,6 @@ class Player {
                 }
             });
             receptor.update(this);
-            receptor.model.position.y += (this.mods['tipsy'] / 100) * Math.sin(((this.mods['tipsyspeed'] + 100) / 100) * time + (i * ((this.mods['tipsyspacing'] + 100) / 100) + (this.mods['tipsyoffset'] / 100)) * 0.5);
             receptor.model.rotation.z = i < 1 ? -Math.PI / 2 : i < 2 ? 0 : i > 2 ? Math.PI / 2 : Math.PI;
             receptor.model.rotation.z += time * (this.mods['confusion'] / 100) + (this.mods['confusionzoffset'] / 100);
             receptor.model.position.x += (this.mods['movex'] / 100);
@@ -523,15 +522,58 @@ class Note {
         this.model = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({
             transparent: true,
             map: new THREE.TextureLoader().load(`./images/tex notes.png`, tex => {
-                tex.offset.x = 0 / 4;
+                let ox = 0;
+                let oy = 3;
+                if (Math.round((beat % 1) * 128) / 128 === .5) {
+                    ox = 1;
+                    oy = 3;
+                }
+                else if (Math.round((beat % 1) * 128) / 128 === 1 / 3) {
+                    ox = 2;
+                    oy = 3;
+                }
+                else if (Math.round((beat % 1) * 128) / 128 === 2 / 3) {
+                    ox = 0;
+                    oy = 2;
+                }
+                else if (Math.round((beat % 1) * 128) / 128 === 1 / 4) {
+                    ox = 3;
+                    oy = 3;
+                }
+                else if (Math.round((beat % 1) * 128) / 128 === 3 / 4) {
+                    ox = 3;
+                    oy = 3;
+                }
+                tex.offset.x = ox / 4;
+                tex.offset.y = oy / 4;
                 tex.repeat.x = 1 / 4;
-                tex.offset.y = 3 / 4;
                 tex.repeat.y = 1 / 4;
             })
         }));
         this.model.rotation.z = lane < 1 ? -Math.PI / 2 : lane < 2 ? 0 : lane > 2 ? Math.PI / 2 : Math.PI;
         this.holdBody = null;
         if (type === 1) {
+            this.holdBody = new THREE.Mesh(new THREE.PlaneGeometry(1, len, 1, len * 4), new THREE.MeshBasicMaterial({
+                transparent: true,
+                map: new THREE.TextureLoader().load(`./images/tex notes.png`, tex => {
+                    tex.offset.x = 2 / 4;
+                    tex.repeat.x = 1 / 4;
+                    tex.offset.y = 1 / 4;
+                    tex.repeat.y = 1 / 4;
+                }),
+                side: THREE.DoubleSide
+            }));
+            let position = this.player.receptors[this.lane].spline.getPosition(0);
+            this.holdBody.position.set(position.x, position.y, position.z);
+            this.player.scene.add(this.holdBody);
+        }
+        else if (type === 2) {
+            this.model.material.map = new THREE.TextureLoader().load(`./images/tex notes.png`, tex => {
+                tex.offset.x = 1 / 4;
+                tex.repeat.x = 1 / 4;
+                tex.offset.y = 1 / 4;
+                tex.repeat.y = 1 / 4;
+            });
         }
         this.player.notes.push(this);
         this.player.scene.add(this.model);
@@ -542,6 +584,33 @@ class Note {
         let normalizedBeat = ((this.beat - songBeat) / modchart.BPMS[0][1]) * -player.mods.xmod * 25 + 1;
         let position = receptor.spline.getPosition(normalizedBeat);
         this.model.position.set(position.x + (this.player.position.x / 100), position.y, position.z);
+        let normalizedLen = this.len / modchart.BPMS[0][1] * -player.mods.xmod * 25;
+        if (this.beat + this.len < songBeat) {
+        }
+        else {
+            if (this.holdBody) {
+                this.holdBody.material.opacity = 1;
+                let holdWidth = 1;
+                let points = this.holdBody.geometry.attributes.position.array;
+                let x = position.x;
+                let y = position.y;
+                let z = position.z;
+                this.holdBody.position.set(x, y, z);
+                let spline = receptor.spline;
+                for (let i = 0; i < points.length; i += 6) {
+                    let position = spline.getPosition((i / points.length) * normalizedLen + normalizedBeat);
+                    points[i] = position.x - holdWidth / 2;
+                    points[i + 1] = position.y;
+                    points[i + 2] = position.z;
+                    if (i + 3 < points.length) {
+                        points[i + 3] = position.x + holdWidth / 2;
+                        points[i + 4] = position.y;
+                        points[i + 5] = position.z;
+                    }
+                }
+                this.holdBody.geometry.attributes.position.needsUpdate = true;
+            }
+        }
     }
 }
 class Chart {
@@ -668,4 +737,5 @@ let data = {
     player1: new Player(1, -scx, 0),
     player2: new Player(2, scx, 0)
 };
+onResize();
 animate();

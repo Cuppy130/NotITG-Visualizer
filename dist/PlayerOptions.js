@@ -78,8 +78,6 @@ var PlayerOptions;
             this.speedRandomSpeed = 1;
             this.speedTimingScale = 1;
         }
-        getFirstAccel() {
-        }
         getString() {
             const mods = [];
             this.getMods(mods);
@@ -224,6 +222,7 @@ var PlayerOptions;
                 return;
             addTo.push(level == 1 ? "" : `${Math.round(level * 100)}` + name);
         }
+        y;
     }
     PlayerOptions_1.PlayerOptions = PlayerOptions;
     let Transform;

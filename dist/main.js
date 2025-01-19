@@ -586,8 +586,6 @@ class Note {
     update() {
         let player = this.player;
         let receptor = player.receptors[this.lane];
-        let normalizedBeat = ((this.beat - songBeat) / modchart.BPMS[0][1]) * -player.mods.xmod * 25 + 1;
-        let normalizedLen = this.len / modchart.BPMS[0][1] * -player.mods.xmod * 25 + this.len;
         let pos = this.model.position.clone();
         this.holdBody?.position.set(pos.x, pos.y, pos.z);
         if (this.beat + this.len < songBeat) {
@@ -601,16 +599,15 @@ class Note {
                 this.holdBody.position.set(0, 0, 0);
                 this.holdBody.geometry.attributes.position.needsUpdate = true;
                 for (let i = 0; i < points.length; i += 6) {
-                    let normalized = (i / points.length) * normalizedLen;
-                    let position = spline.getPosition(normalized + normalizedBeat);
+                    let beat = (i / points.length) * this.len;
+                    let normalizedBeat = ((this.beat + beat - songBeat) / modchart.BPMS[0][1]) * -player.mods.xmod * 25 + 1;
+                    let position = spline.getPosition(normalizedBeat);
                     points[i] = position.x - holdWidth / 2;
                     points[i + 1] = position.y;
                     points[i + 2] = position.z;
-                    if (i + 3 < points.length) {
-                        points[i + 3] = position.x + holdWidth / 2;
-                        points[i + 4] = position.y;
-                        points[i + 5] = position.z;
-                    }
+                    points[i + 3] = position.x + holdWidth / 2;
+                    points[i + 4] = position.y;
+                    points[i + 5] = position.z;
                 }
             }
         }

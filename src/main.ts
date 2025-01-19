@@ -724,18 +724,7 @@ class Note {
 
             this.player.scene.add(this.holdBody);
 
-            // const tail = new THREE.Mesh(
-            //     new THREE.PlaneGeometry(1, 1),
-            //     new THREE.MeshBasicMaterial({
-            //         transparent: true,
-            //         map: new THREE.TextureLoader().load(`./images/tex notes.png`, tex => {
-            //             tex.offset.x = 2 / 4;
-            //             tex.repeat.x = 1 / 4;
-            //             tex.offset.y = 0 / 4;
-            //             tex.repeat.y = 1 / 4;
-            //         })
-            //     })
-            // )
+            // const tail = new THREE.Mesh( 
 
             // tail.position.y = -1
 
@@ -762,11 +751,9 @@ class Note {
         let player = this.player;
         let receptor = player.receptors[this.lane];
 
-        let normalizedBeat = ((this.beat - songBeat) / modchart.BPMS[0][1]) * -player.mods.xmod * 25 + 1;
 
         // let position = receptor.spline.getPosition(normalizedBeat);
         // this.model.position.set(position.x + (this.player.position.x / 100), position.y, position.z);
-        let normalizedLen = this.len / modchart.BPMS[0][1] * -player.mods.xmod * 25 + this.len;
         let pos = this.model.position.clone();
         this.holdBody?.position.set(pos.x, pos.y, pos.z);
         if(this.beat + this.len < songBeat){
@@ -787,20 +774,17 @@ class Note {
                 this.holdBody.geometry.attributes.position.needsUpdate = true;
 
                 for(let i = 0; i < points.length; i+=6){
-                    let normalized = (i / points.length) * normalizedLen;
-                    let position = spline.getPosition(normalized + normalizedBeat);
-                    points[i] = position.x - holdWidth / 2;
-                    points[i + 1] = position.y;
-                    points[i + 2] = position.z;
-                    if(i+3 < points.length){
-                        points[i + 3] = position.x + holdWidth / 2; 
-                        points[i + 4] = position.y;
-                        points[i + 5] = position.z;
-                    }
-                    
-                }
 
-                
+                    let beat = (i / points.length) * this.len;
+                    let normalizedBeat = ((this.beat + beat - songBeat) / modchart.BPMS[0][1]) * -player.mods.xmod * 25 + 1;
+                    let position = spline.getPosition(normalizedBeat);
+                    points[i] = position.x - holdWidth / 2;
+                    points[i+1] = position.y;
+                    points[i+2] = position.z;
+                    points[i+3] = position.x + holdWidth / 2;
+                    points[i+4] = position.y;
+                    points[i+5] = position.z;
+                }
             }
         }
     }
